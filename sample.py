@@ -7,22 +7,21 @@
 # ATOM     14  CA  ARG A   3      -9.584 -53.334 -24.511  1.00 88.33           C  
 # ANISOU   14  CA  ARG A   3     9104  13627  10832  -4348    540   2112       C 
 
-#入力
-input_array_a = [
-    [A,[-10.276, -58.943, -23.782]],
-    [GLY,[-9.448, -56.511, -26.618]],
-    [ARG,[ -9.584, -53.334, -24.511]],
-]
+# input_array_a = [
+#     [A,[-10.276, -58.943, -23.782]],
+#     [GLY,[-9.448, -56.511, -26.618]],
+#     [ARG,[ -9.584, -53.334, -24.511]],
+# ]
 
-input_array_b = [
-    [A,[-10.276, -58.943, -23.782]],
-    [GLY,[-9.448, -56.511, -26.618]],
-    [ARG,[ -9.584, -53.334, -24.511]],
-]
+# input_array_b = [
+#     [A,[-10.276, -58.943, -23.782]],
+#     [GLY,[-9.448, -56.511, -26.618]],
+#     [ARG,[ -9.584, -53.334, -24.511]],
+# ]
 
-def ddp(input_array_a , input_array_b)
-    return res
+# def ddp(input_array_a , input_array_b)
+#     return res
 
-from pdb import 6xb5
+# from pdb import 6xb5
 
-f = open('../pdb/6xb5.pdb', 'r', encoding='UTF-8')
+# f = open('../pdb/6xb5.pdb', 'r', encoding='UTF-8')

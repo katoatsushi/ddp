@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 # sample = ['AGT', 'AGCT']
 # sample = ['AGCT','AGT']
 sample = ['LIVELY','MICKEY']

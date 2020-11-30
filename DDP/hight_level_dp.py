@@ -1,10 +1,14 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*
+import low_level_scoring_matrix
+import set_data
 
-# sample = ['AGT', 'AGCT']
-sample = ['AGCT','AGT']
-# sample = ['AGTFYUKKPB', 'AGCT']
-#sample = ['AGTUT', 'AGCTTT']
-#sample = ['AGTT', 'AGCT']
+f1 = open('../pdb/3wtg.pdb', 'r')
+f2 = open('../pdb/4yu3.pdb', 'r')
+amino_a = set_data.put_amino_position(f1)
+amino_b = set_data.put_amino_position(f2)
+hight_level_scoring_matrix = low_level_scoring_matrix.init(amino_a, amino_b)
+#print(hight_level_scoring_matrix)
+
 def alignment(aminos, result_array):
     amino_a = aminos[0]
     amino_b = aminos[1]
@@ -47,12 +51,13 @@ def alignment_result(node_num_array, aminos):
         if (counter + 1) == len(node_num_array):
             break
     res = alignment(aminos, result_array)
-    print('アライメント後：', res)
+    RES_0 = ''.join(res[0])
+    RES_1 = ''.join(res[1])
+    print(RES_0)
+    print(RES_1)
+    # print('アライメント後：', res)
 
 def  make_optimal_path(arg, max_node, aminos):
-    print("*"*100)
-    print(max_node)
-    print(aminos)
     flatten_div_array = []
     for mini_arg in arg:
         for i in mini_arg:
@@ -65,27 +70,22 @@ def  make_optimal_path(arg, max_node, aminos):
         main_array.append(last[1])
     main_array.reverse()
     main_array.append(max_node)
-    print(main_array)
-    #alignment_result(main_array, aminos)
+    #print(main_array)
+    alignment_result(main_array, aminos)
 
 def check_score_and_prenode(arg, aminos):
-    print('A'*100)
-    print(arg)
-    print(aminos)
     width = len(arg[0])
     amino_height = aminos[0] # ['A','G','T']
     amino_width = aminos[1] # ['A','G','C','T']
     max_node = (len(amino_height)+ 1)*(len(amino_width) + 1)
     the_arg = arg[1:] 
-    rows_counter = 1
-    for mono_array in the_arg: # [-6,None,None,None,None]
+    rows_counter = 0
+    for mono_array in arg: # [-6,None,None,None,None]
         rows_counter = rows_counter + 1
         simple_counter = 0
         for arr in mono_array: # -6
             this_number = width*(rows_counter-1) + simple_counter + 1
             if arr == None:
-                # 最大スコアと移動前のノードを決める 
-                # rows_counter　が横, simple_counterが縦
                 left = arg[rows_counter - 1][simple_counter - 1]
                 if type(left) == list:
                     left = left[0]
@@ -95,11 +95,8 @@ def check_score_and_prenode(arg, aminos):
                 diagonal = arg[rows_counter - 2][simple_counter - 1]
                 if type(diagonal) == list:
                     diagonal = diagonal[0]
-                if amino_height[rows_counter - 2] == amino_width[simple_counter - 1]:
-                    gap = 1 #　一致した時
-                else:
-                    gap = -2 #　一致していない時
-                score_array = [left-3, top-3, diagonal + gap]
+                tap = hight_level_scoring_matrix[rows_counter - 2][simple_counter - 1]
+                score_array = [left-3, top-3, diagonal + tap]
                 max_score = max(score_array)
                 if type(max_score) == list: # 経路が複数ある場合は最初の経路だけを取得する
                     if max_score[0] == max_score[1] == max_score[2]:
@@ -130,7 +127,7 @@ def check_score_and_prenode(arg, aminos):
 def make_array(arg):
     arg1 = list(arg[0])
     arg2 = list(arg[1])
-    print('アライメント前：', arg1, arg2)
+    #print('アライメント前：', arg1, arg2)
     arg_amino = [arg1, arg2]
     l = [None] * len(arg2)
     simple_array = []
@@ -150,9 +147,13 @@ def make_array(arg):
         counter = counter + 1
     simple_array[0] = first_array
     
-    print(simple_array)
-    print("%"*200)
     check_score_and_prenode(simple_array, arg_amino)
 
-# make_array関数を起動
+
+
+arg1 = [x[0] for x in amino_a]
+arg2 = [y[0] for y in amino_b]
+sample = [arg2, arg1]
 make_array(sample)
+
+

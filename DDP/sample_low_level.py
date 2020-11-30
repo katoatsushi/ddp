@@ -2,6 +2,7 @@
 import math
 import decimal
 import itertools
+import numpy as np
 
 amino_a = [
     ['V', 0, 0, 1],
@@ -14,16 +15,14 @@ amino_a = [
 amino_b = [
     ['A', 0, 0, 2],
     ['B', 0, 0, 4],
-    ['C', 0, 0, 6],
-    ['D', 0, 0, 8],
-    ['E', 0, 0, 10]
+    ['C', 0, 0, 6]
+    # ['D', 0, 0, 8]
+    # ['E', 0, 0, 10]
 ]
 gap = -4
 
 def measure_the_distance(arg1, arg2):
-    # print("---------arg 1---------")
     # print(arg1)
-    # print("---------arg 2---------")
     # print(arg2)
     x_1 = abs(arg1[0][1]**2 - arg1[1][1]**2)
     y_1 = abs(arg1[0][2]**2 - arg1[1][2]**2)
@@ -36,51 +35,84 @@ def measure_the_distance(arg1, arg2):
     dis = distance_2 - distance_1
     if dis < 0:
         dis = -dis
-    # print("===============dis is ==========")
-    # print(distance_1, distance_2, dis)
-    # print("%"*100)
     dis = float(format(dis, '.2f'))
-    ## dis = decimal.Decimal((format(dis, '.2f')))
-    # print(type(dis))
+    # print(dis)
+    # print("+"*100)
     return dis
     
 
-def find_path(height, width, arg):
-    print('============arg==========')
-    print(arg)
-    start = arg[-1][-1][1]
-    height = len(height)
-    width = len(width)
+def find_path(low_level_score_matrix, lange,  height, width, arg, first_or_not):
+    # print("="*50, "we are in the find_path function","="*50)
+    # print('=======================================arg==========================================')
+    # print(arg)
+    # print("="*100)
+    # print('width:',width,'height:', height)
+    start = arg[-1][-1]
+    # if (lange['height'][0] == 1) and (lange['width'][0] == 1):
+    #     height = len(height)
+    #     width = len(width)
+    # else:
+    #     height = len(height) + 1
+    #     width = len(width) + 1
+    if first_or_not:
+        height = len(height)
+        width = len(width)
+    else:
+        height = len(height) + 1
+        width = len(width) + 1
+
     goal = (height)*(width)
-    print(max_node)
-    print("========== height and width =============")
-    print('height is :', height, 'width is :', width)
     new_array = [[0] * width] * height
-    print("========== new araay is =============")
-    print(new_array)
     new_array[-1][-1] = arg[-1][-1][0]
-    #print(new_array[-1][-1])
-    
-    next_is = start
-    while type(next_is) != list:
-        q = start//width
-        mod = start%width
-        next_is = arg[q][mod-1]
-        nex_score = next_is[0]
-        next_node = next_is[1]
-        new_array[q][mod-1] = nex_score
-    print(new_array)
 
+    from_is = start 
+    from_num = height*width 
+    #print(from_is, from_num)
+    # print("-"*50, "lange","-"*50)
+    # print(lange)
+    while type(from_is) == list:
+        to_num = from_is[1]
+        mod = to_num%width #0
+        q = to_num//width #4
+        # print('q:',q, 'mod:', mod, "width:", width)
+        if mod == 0:
+            to = arg[q-1][mod-1]
+        else:
+            to = arg[q][mod-1]
+        # print('番号',from_num,'から番号',to_num,'までの解析')
+        # print('========from is::',from_is, '======to is', to)
+        if (from_num - to_num) == (width + 1):
+            if type(to) != list:
+                score = from_is[0] - to
+                if first_or_not: # 前半の場合
+                    low_level_score_matrix[q][mod-1] = score
+                else: # 後半の場合
+                    low_level_score_matrix[lange['height'][0] + q][lange['width'][0] + mod-1] = score
 
-def check_score_and_prenode(first_input, low_level_score_matrix):
-    print("&"*100)
-    print(first_input)
+                break
+            else:
+                score = from_is[0] - to[0]
+                if first_or_not: # 前半の場合
+                    low_level_score_matrix[q][mod-1] = score
+                else: # 後半の場合
+                    low_level_score_matrix[lange['height'][0] + q][lange['width'][0] + mod-1] = score
+        from_is = to
+        from_num = to_num
+        to_num = to[1]
+    #print(low_level_score_matrix)
+
+def check_score_and_prenode(index, first_input, low_level_score_matrix, first_or_not):
+    index_a = index[0]
+    index_b = index[1]
+    lange = first_input[0]
+    #print(first_input)
     arg = first_input[2]
-    print("arg"*100)
-    print(arg)
+    # print(arg)
     width = len(arg[0])
     amino_height = first_input[1][1] # ['A','G','T']
     amino_width = first_input[1][0] # ['A','G','C','T']
+    # print("amino_width is:", amino_width)
+    # print("amino_height is:",amino_height)
     max_node = (len(amino_height)+ 1)*(len(amino_width) + 1)
     the_arg = arg[1:] 
     rows_counter = 1
@@ -94,103 +126,126 @@ def check_score_and_prenode(first_input, low_level_score_matrix):
                 top = arg[rows_counter - 2][simple_counter]
                 diagonal = arg[rows_counter - 2][simple_counter - 1]
                 if type(left) == list:
-                    print("aaaaaaaaaaaaaa")
                     left = left[0]
                 if type(top) == list:
                     top = top[0]
                 if type(diagonal) == list:
                     diagonal = diagonal[0]
-                print(top, left,diagonal)
-                tap = measure_the_distance([amino_height[rows_counter-2], amino_height[-1]], [amino_width[simple_counter - 1], amino_width[-1]])
+                tap = measure_the_distance([amino_height[rows_counter-2], index_b], [amino_width[simple_counter - 1], index_a])
                 score_array = [left + gap, top + gap, diagonal + tap]
                 max_score = max(score_array)
                 if type(max_score) == list: # 経路が複数ある場合は最初の経路だけを取得する
                     if max_score[0] == max_score[1] == max_score[2]:
                         number = [this_number - 1, this_number - width, this_number - width - 1]
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score, number]
                     elif max_score[0] == max_score[1]:
                         number = [this_number - 1, this_number - width]
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score, number]
                     elif max_score[0] == max_score[2]:
                         number = [this_number - 1, this_number - width - 1]
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score,number]
                     elif max_score[1] == max_score[2]:
                         number = [this_number - width, this_number - width - 1]
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score, number]
                 else:
                     if score_array.index(max_score) == 0: # 左から来た時
                         number = this_number - 1
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score, number]
                     elif score_array.index(max_score) == 1:  # 上から来た時
                         number = this_number - width
-                        arg[rows_counter - 1][simple_counter]= [max_score, [this_number,number]]
+                        arg[rows_counter - 1][simple_counter]= [max_score, number]
                     elif score_array.index(max_score) == 2: # 斜めから来た時
                         number = this_number - width - 1
-                        arg[rows_counter - 1][simple_counter] = [[max_score, tap], [this_number,number]]
-                        print("this is gooooood", tap)
-                        print('Node', this_number, "to", number)
+                        arg[rows_counter - 1][simple_counter] = [max_score, number]
             simple_counter = simple_counter + 1
     
     final_score = list(itertools.chain.from_iterable(arg))[-1]
-    print("final score is:", final_score)
-    print(arg)
-    #find_path(amino_height, amino_width, arg)
+    find_path(low_level_score_matrix, lange, amino_height, amino_width, arg, first_or_not)
+    return final_score
 
-
-def first(amino_a, amino_b):
-    low_level_score_matrix = [[0]*len(amino_a)]*len(amino_b)
-    a_num = 4
-    a_last = len(amino_a) - a_num
-    b_num = 3
-    b_last = len(amino_b) - b_num
-    #print('a_num', a_num, 'b_num', b_num, '::::::::a_last', a_last, 'b_last', b_last)
-    arg1 = [x[0] for x in amino_a]
-    arg2 = [y[0] for y in amino_b]
-    print("マッチしているのはこの2つ")
-    print(arg1[a_num-1])
-    print(arg2[b_num-1])
-    matrix_num = [[a_num, b_num], [a_last, b_last]]
-
+def make_array(arg):
+    arg1 = list(arg[1])
+    arg2 = list(arg[0])
     arg_amino = [arg1, arg2]
     l = [None] * len(arg2)
     simple_array = []
     counter = 0
-    for i in range(len(arg1) + 1):
-        num = [counter * -4.0]
+    for i in range(len(arg1)+1):
+        num = [counter * -4]
         num.extend(l)
         simple_array.append(num)
         counter = counter + 1
+    # 配列に初期のギャップを入れる
     first = simple_array[0]
     counter = 0
     first_array = []
     for i in first:
-        i = counter*-4.0
+        i = counter*-4
         first_array.append(i)
         counter = counter + 1
     simple_array[0] = first_array
-    # for i in simple_array:
-    #     print(i)
-    # print("%"*200)
-    first = []
-    counter = 0
-    for i in simple_array:
-        if not counter >= b_num:
-            first.append(i[0:a_num])
-        counter = counter + 1
-    first_input = [[[1, a_num], [1, b_num]],[amino_a[:a_num], amino_b[:b_num]], first]
-    # print(first)
-    # print("*"*100)
-    second = []
-    counter = 0
-    for i in simple_array:
-        if not counter < b_num:
-            second.append(i[a_num:])
-        counter = counter + 1
-    # print(second)
-    # print("!"*100)
-    print(first_input)
-    print(low_level_score_matrix)
-    check_score_and_prenode(first_input, low_level_score_matrix)
+    return simple_array
 
 
-first(amino_a, amino_b)
+def first(amino_a, amino_b, a_num, b_num):
+    width_max = len(amino_a)
+    height_max = len(amino_b)
+    low_level_score_matrix = np.zeros((len(amino_b),len(amino_a)))
+
+    a_last = len(amino_a) - a_num
+    a_index = amino_a[a_num-1]
+
+    b_last = len(amino_b) - b_num
+    b_index = amino_b[b_num-1]
+    index = [a_index, b_index]
+    #print('a_num', a_num, 'b_num', b_num, '::::::::a_last', a_last, 'b_last', b_last)
+    arg1 = [x[0] for x in amino_a]
+    arg2 = [y[0] for y in amino_b]
+    # print("we assume that this two is match========",arg1[a_num-1],arg2[b_num-1])
+    matrix_num = [[a_num, b_num], [a_last, b_last]]
+
+    low_level_score_matrix[b_num -1][a_num -1]= 25    
+
+    first_or_not = True
+    if (a_num != 1) and (b_num != 1):        
+        first_arg1 = [x[0] for x in amino_a[:a_num-1]]
+        first_arg2 = [y[0] for y in amino_b[:b_num-1]]
+        first_objs = [first_arg1, first_arg2]
+        res = make_array(first_objs)
+        #first_input = [{"width":[1, a_num-1], "height":[1, b_num-1]},[amino_a[:a_num-1], amino_b[:b_num-1]], res]
+        first_input = [{"width":[1, a_num], "height":[1, b_num]},[amino_a[:a_num], amino_b[:b_num]], res]
+        final_score = check_score_and_prenode(index, first_input, low_level_score_matrix, first_or_not)
+        # print(res)
+        # print(final_score)
+    
+    # print(":"*100)
+    # print("後半のDPをしていくよ!!!!!")
+    first_or_not = False
+    #print("a_num is:", a_num, "b_num is:", b_num,"max_width is:", width_max,  "height_max is:", height_max)
+    if (a_num != width_max) and (b_num != height_max):
+        first_arg1 = [x[0] for x in amino_a[a_num:]]
+        first_arg2 = [y[0] for y in amino_b[b_num:]]
+        first_objs = [first_arg1, first_arg2]
+        res = make_array(first_objs)
+        second_input = [{"width":[a_num, len(amino_a)], "height":[b_num, len(amino_a)]},[amino_a[a_num:], amino_b[b_num:]], res]
+        check_score_and_prenode(index, second_input, low_level_score_matrix, first_or_not)
+        #print(second_input)
+    #print(low_level_score_matrix)
+    return low_level_score_matrix
+
+def init(amino_a, amino_b):
+    low_level_score_matrixs = np.zeros((len(amino_b),len(amino_a)))
+    width_max = len(amino_a)
+    height_max = len(amino_b)
+    for i_w in range(width_max+1):
+        for i_h in range(height_max+1):
+            if (i_w != 0) and (i_h != 0):
+                a_num = i_w
+                b_num = i_h
+                #print("a_numは",a_num, "b_numは",b_num)
+                low_level_score_matrixs += first(amino_a, amino_b, a_num, b_num)
+    print(low_level_score_matrixs)
+
+
+#first(amino_a, amino_b)
+init(amino_a, amino_b)

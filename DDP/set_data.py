@@ -22,7 +22,6 @@ def put_amino_position(f):
     print("*"*300)
     for i in res:
         print(i)
-        #print(len(res))
     return res
 
 # put_amino_position(f1)
