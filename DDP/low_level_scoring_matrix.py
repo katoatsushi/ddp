@@ -196,7 +196,7 @@ def first(amino_a, amino_b, a_num, b_num):
     arg2 = [y[0] for y in amino_b]
     matrix_num = [[a_num, b_num], [a_last, b_last]]
 
-    low_level_score_matrix[b_num -1][a_num -1]= 100
+    low_level_score_matrix[b_num -1][a_num -1]= 25
 
     first_or_not = True
     if (a_num != 1) and (b_num != 1):        
@@ -215,18 +215,23 @@ def first(amino_a, amino_b, a_num, b_num):
         res = make_array(first_objs)
         second_input = [{"width":[a_num, len(amino_a)], "height":[b_num, len(amino_a)]},[amino_a[a_num:], amino_b[b_num:]], res]
         check_score_and_prenode(index, second_input, low_level_score_matrix, first_or_not)
+    print(low_level_score_matrix)
+    print("="*100)
     return low_level_score_matrix
 
 def init(amino_a, amino_b):
     low_level_score_matrixs = np.zeros((len(amino_b),len(amino_a)))
     width_max = len(amino_a)
     height_max = len(amino_b)
+    main_counter = 0
     for i_w in range(width_max+1):
         for i_h in range(height_max+1):
             if (i_w != 0) and (i_h != 0):
                 a_num = i_w
                 b_num = i_h
                 low_level_score_matrixs += first(amino_a, amino_b, a_num, b_num)
+                print(main_counter)
+                main_counter = main_counter + 1
     print(low_level_score_matrixs)
     return low_level_score_matrixs
 

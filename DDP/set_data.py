@@ -11,20 +11,18 @@ f2 = open('../pdb/4yu3.pdb', 'r')
 
 def put_amino_position(f):
     res = []
-    # counter = 0
     for i in f:
         one_atom_date = i.split()
         if (one_atom_date[0] == 'ATOM') and ((one_atom_date[2] == 'CA')): 
             if (one_atom_date[4] == "A"):
-                #while counter <= 50:
-                    amino = one_string_aminos[one_atom_date[3]]
-                    x = float(one_atom_date[6])
-                    y = float(one_atom_date[7])
-                    z = float(one_atom_date[8])
-                    res.append([amino, x, y, z])
-        # counter = counter + 1
-        # print(counter)
+                amino = one_string_aminos[one_atom_date[3]]
+                x = float(one_atom_date[6])
+                y = float(one_atom_date[7])
+                z = float(one_atom_date[8])
+                res.append([amino, x, y, z])
     print("*"*300)
+
+    # res = res[:100] 
 
     counter = 0
     for i in res:
