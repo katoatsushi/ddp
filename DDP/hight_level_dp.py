@@ -7,7 +7,8 @@ f2 = open('../pdb/4yu3.pdb', 'r')
 amino_a = set_data.put_amino_position(f1)
 amino_b = set_data.put_amino_position(f2)
 hight_level_scoring_matrix = low_level_scoring_matrix.init(amino_a, amino_b)
-#print(hight_level_scoring_matrix)
+print("hight_level_scoring_matrix is")
+print(hight_level_scoring_matrix)
 
 def alignment(aminos, result_array):
     amino_a = aminos[0]

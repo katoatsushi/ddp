@@ -5,35 +5,56 @@ import itertools
 import numpy as np
 
 amino_a = [
-    ['V', 0, 0, 1],
-    ['L', 0, 0, 2],
-    ['S', 0, 0, 3],
-    ['A', 0, 0, 4],
-    ['A', 0, 0, 5]
+    ['V', 1, 2, 1],
+    ['L', 3, 1, 2],
+    ['S', 1, 4, 3],
+    ['A', 1, 2, 4],
+    ['A', 5, 3, 5]
 ]
 
 amino_b = [
-    ['A', 0, 0, 2],
-    ['B', 0, 0, 4],
-    ['C', 0, 0, 6]
-    # ['D', 0, 0, 8]
-    # ['E', 0, 0, 10]
+    ['A', 2, 2, 2],
+    ['B', 3, 5, 4],
+    ['C', 2, 1, 6],
+    ['D', 9, 6, 8],
+    ['E', 12, 15, 10]
 ]
+
+# amino_a = [
+#     ['V', 0, 0, 1],
+#     ['L', 0, 0, 2],
+#     ['S', 0, 0, 3],
+#     ['A', 0, 0, 4],
+#     ['A', 0, 0, 5]
+# ]
+
+# amino_b = [
+#     ['A', 0, 0, 2],
+#     ['B', 0, 0, 4],
+#     ['C', 0, 0, 6],
+#     ['D', 0, 0, 8],
+#     ['E', 0, 0, 10]
+# ]
 gap = -4
 
 def measure_the_distance(arg1, arg2):
-    x_1 = abs(arg1[0][1]**2 - arg1[1][1]**2)
-    y_1 = abs(arg1[0][2]**2 - arg1[1][2]**2)
-    z_1 = abs(arg1[0][3]**2 - arg1[1][3]**2)
-    x_2 = abs(arg2[0][1]**2 - arg2[1][1]**2)
-    y_2 = abs(arg2[0][2]**2 - arg2[1][2]**2)
-    z_2 = abs(arg2[0][3]**2 - arg2[1][3]**2)
+    # print(arg1)
+    # print(arg2)
+
+    x_1 = abs(arg1[0][1] - arg1[1][1])**2
+    y_1 = abs(arg1[0][2] - arg1[1][2])**2
+    z_1 = abs(arg1[0][3] - arg1[1][3])**2
+
+    x_2 = abs(arg2[0][1] - arg2[1][1])**2
+    y_2 = abs(arg2[0][2] - arg2[1][2])**2
+    z_2 = abs(arg2[0][3] - arg2[1][3])**2
     distance_1 = math.sqrt(x_1 + y_1 + z_1)
     distance_2 = math.sqrt(x_2 + y_2 + z_2)
     dis = distance_2 - distance_1
     if dis < 0:
         dis = -dis
     dis = float(format(dis, '.2f'))
+    # print("dis:", dis)
     return dis
     
 
@@ -206,4 +227,9 @@ def init(amino_a, amino_b):
                 a_num = i_w
                 b_num = i_h
                 low_level_score_matrixs += first(amino_a, amino_b, a_num, b_num)
+    print(low_level_score_matrixs)
     return low_level_score_matrixs
+
+
+init(amino_a, amino_b)
+# init => first (=> make_array) => check_score_and_prenode( => measure_the_distance) => find_path
