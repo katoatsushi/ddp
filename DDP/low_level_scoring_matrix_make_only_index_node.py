@@ -4,6 +4,9 @@ import decimal
 import itertools
 import numpy as np
 
+# low level scoreing matrix　を作成する際にマッチしていると仮定したノードに初期スコア25を入力し、
+# DPして最適パスを求め、総スコアを指定したノードに代入しhight level score　を作る
+
 amino_a = [
     ['V', 1, 2, 1],
     ['L', 3, 1, 2],
@@ -23,9 +26,6 @@ amino_b = [
 gap = -4
 
 def measure_the_distance(arg1, arg2):
-    # print(arg1)
-    # print(arg2)
-
     x_1 = abs(arg1[0][1] - arg1[1][1])**2
     y_1 = abs(arg1[0][2] - arg1[1][2])**2
     z_1 = abs(arg1[0][3] - arg1[1][3])**2
@@ -39,53 +39,10 @@ def measure_the_distance(arg1, arg2):
     if dis < 0:
         dis = -dis
     dis = float(format(dis, '.2f'))
-    # print("dis:", dis)
     dis = 50.0/(dis+5.0)
     return dis
-    
 
-def find_path(low_level_score_matrix, lange,  height, width, arg, first_or_not):
-    start = arg[-1][-1]
-    if first_or_not:
-        height = len(height)
-        width = len(width)
-    else:
-        height = len(height) + 1
-        width = len(width) + 1
-
-    goal = (height)*(width)
-    new_array = [[0] * width] * height
-    new_array[-1][-1] = arg[-1][-1][0]
-
-    from_is = start 
-    from_num = height*width 
-    while type(from_is) == list:
-        to_num = from_is[1]
-        mod = to_num%width #0
-        q = to_num//width #4
-        if mod == 0:
-            to = arg[q-1][mod-1]
-        else:
-            to = arg[q][mod-1]
-        if (from_num - to_num) == (width + 1):
-            if type(to) != list:
-                score = from_is[0] - to
-                if first_or_not: # 前半の場合
-                    low_level_score_matrix[q][mod-1] = score
-                else: # 後半の場合
-                    low_level_score_matrix[lange['height'][0] + q][lange['width'][0] + mod-1] = score
-                break
-            else:
-                score = from_is[0] - to[0]
-                if first_or_not: # 前半の場合
-                    low_level_score_matrix[q][mod-1] = score
-                else: # 後半の場合
-                    low_level_score_matrix[lange['height'][0] + q][lange['width'][0] + mod-1] = score
-        from_is = to
-        from_num = to_num
-        to_num = to[1]
-
-def check_score_and_prenode(index, first_input, low_level_score_matrix, first_or_not):
+def check_score_and_prenode(index, first_input, first_or_not):
     index_a = index[0]
     index_b = index[1]
     lange = first_input[0]
@@ -138,8 +95,8 @@ def check_score_and_prenode(index, first_input, low_level_score_matrix, first_or
                         number = this_number - width - 1
                         arg[rows_counter - 1][simple_counter] = [max_score, number]
             simple_counter = simple_counter + 1
+
     final_score = list(itertools.chain.from_iterable(arg))[-1]
-    find_path(low_level_score_matrix, lange, amino_height, amino_width, arg, first_or_not)
     return final_score
 
 def make_array(arg):
@@ -163,35 +120,34 @@ def make_array(arg):
         first_array.append(i)
         counter = counter + 1
     simple_array[0] = first_array
-    # print(simple_array)
     return simple_array
 
 
-def first(amino_a, amino_b, a_num, b_num):
+def first(amino_a, amino_b, a_num, b_num, first_func_counter):
     width_max = len(amino_a)
     height_max = len(amino_b)
-    low_level_score_matrix = np.zeros((len(amino_b),len(amino_a)))
 
     a_last = len(amino_a) - a_num
     a_index = amino_a[a_num-1]
-
     b_last = len(amino_b) - b_num
     b_index = amino_b[b_num-1]
+
     index = [a_index, b_index]
     arg1 = [x[0] for x in amino_a]
     arg2 = [y[0] for y in amino_b]
     matrix_num = [[a_num, b_num], [a_last, b_last]]
-
-    low_level_score_matrix[b_num -1][a_num -1]= 25
-
+    
+    total_score = 0
     first_or_not = True
-    if (a_num != 1) and (b_num != 1):        
+    if (a_num != 1) and (b_num != 1):      
         first_arg1 = [x[0] for x in amino_a[:a_num-1]]
         first_arg2 = [y[0] for y in amino_b[:b_num-1]]
         first_objs = [first_arg1, first_arg2]
         res = make_array(first_objs)
         first_input = [{"width":[1, a_num], "height":[1, b_num]},[amino_a[:a_num], amino_b[:b_num]], res]
-        final_score = check_score_and_prenode(index, first_input, low_level_score_matrix, first_or_not)
+        final_score = check_score_and_prenode(index, first_input, first_or_not)
+        total_score += final_score[0]
+        total_score += 25
 
     first_or_not = False
     if (a_num != width_max) and (b_num != height_max):
@@ -200,28 +156,30 @@ def first(amino_a, amino_b, a_num, b_num):
         first_objs = [first_arg1, first_arg2]
         res = make_array(first_objs)
         second_input = [{"width":[a_num, len(amino_a)], "height":[b_num, len(amino_a)]},[amino_a[a_num:], amino_b[b_num:]], res]
-        check_score_and_prenode(index, second_input, low_level_score_matrix, first_or_not)
-    # print(low_level_score_matrix)
-    # print("="*100)
-    return low_level_score_matrix
+        final_score = check_score_and_prenode(index, second_input, first_or_not)
+        total_score += final_score[0]
+
+    print(width_max * height_max, ":", first_func_counter)
+    return total_score
 
 def init(amino_a, amino_b):
     low_level_score_matrixs = np.zeros((len(amino_b),len(amino_a)))
     width_max = len(amino_a)
     height_max = len(amino_b)
     main_counter = 0
+    first_func_counter = 0
     for i_w in range(width_max+1):
         for i_h in range(height_max+1):
             if (i_w != 0) and (i_h != 0):
                 a_num = i_w
                 b_num = i_h
-                low_level_score_matrixs += first(amino_a, amino_b, a_num, b_num)
-                print("to", len(amino_a)*len(amino_b) ,":", main_counter)
-                # print("low level score matrix is")
+                # 各ノードにスコア情報を足していく
+                low_level_score_matrixs[b_num -1][a_num -1] = first(amino_a, amino_b, a_num, b_num, first_func_counter)
+                print(low_level_score_matrixs)
                 main_counter = main_counter + 1
+                first_func_counter += 1
+    total = np.sum(low_level_score_matrixs)
     # print(low_level_score_matrixs)
     return low_level_score_matrixs
 
-
-init(amino_a, amino_b)
-# init => first (=> make_array) => check_score_and_prenode( => measure_the_distance) => find_path
+# init(amino_a, amino_b)

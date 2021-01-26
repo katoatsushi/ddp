@@ -1,14 +1,39 @@
 # -*- coding: utf-8 -*
 import low_level_scoring_matrix
 import set_data
+import drms
+import csv
 
-f1 = open('../pdb/3wtg.pdb', 'r')
-f2 = open('../pdb/4yu3.pdb', 'r')
-amino_a = set_data.put_amino_position(f1)
-amino_b = set_data.put_amino_position(f2)
-hight_level_scoring_matrix = low_level_scoring_matrix.init(amino_a, amino_b)
-print("hight_level_scoring_matrix is")
-print(hight_level_scoring_matrix)
+# 処理
+# アズリン(4azu)とプラストシアニン(7pcy)の検証(position　128の行まで)
+# f1 = open('../pdb/4azu.pdb', 'r')
+# f2 = open('../pdb/7pcy.pdb', 'r')
+# f1_length = [2,128]
+# f2_length = [0,99]
+# # 二枚貝ヘモグロビン(3g46) vs ヒトヘモグロビン(4hhb)
+# f1 = open('../pdb/3g46.pdb', 'r')
+# f2 = open('../pdb/4hhb.pdb', 'r')
+# f1_length = [9, 146]
+# f2_length = [1, 137]
+# # 二枚貝ヘモグロビン(3g46) vs シアノバクテリアC-フィコシアニン(1gh0)
+# f1 = open('../pdb/3g46.pdb', 'r')
+# f2 = open('../pdb/1gh0.pdb', 'r')
+# f1_length = [11, 147]
+# f2_length = [30, 161]
+# # ヒトヘモグロビン(4hhb) vs シアノバクテリアC-フィコシアニン(1gh0)
+# f1 = open('../pdb/4hhb.pdb', 'r')
+# f2 = open('../pdb/1gh0.pdb', 'r')
+# f1_length = [3, 137]
+# f2_length = [30, 162]
+
+# amino_a = set_data.put_amino_position(f1)
+# amino_b = set_data.put_amino_position(f2)
+
+amino_a, strings_a = set_data.matras_put_amino_position(f1, f1_length)
+amino_b, strings_b = set_data.matras_put_amino_position(f2, f2_length)
+
+print(strings_a)
+print(strings_b)
 
 def alignment(aminos, result_array):
     amino_a = aminos[0]
@@ -56,7 +81,9 @@ def alignment_result(node_num_array, aminos):
     RES_1 = ''.join(res[1])
     print(RES_0)
     print(RES_1)
-    # print('アライメント後：', res)
+    print('アライメント後：', res)
+    drms.distancebased_root_mean_square_deviation(amino_a, amino_b, res)
+
 
 def  make_optimal_path(arg, max_node, aminos):
     flatten_div_array = []
@@ -150,11 +177,23 @@ def make_array(arg):
     
     check_score_and_prenode(simple_array, arg_amino)
 
+ 
 
+hight_level_scoring_matrix = low_level_scoring_matrix.init(amino_a, amino_b)
+print("hight_level_scoring_matrix is")
+print(hight_level_scoring_matrix)
+
+filename = 'hight_level.csv'
+# ファイル，1行目(カラム)の作成
+with open(filename, 'w') as f:
+    writer = csv.writer(f)
+    for i in hight_level_scoring_matrix:
+        writer.writerow(i)
 
 arg1 = [x[0] for x in amino_a]
 arg2 = [y[0] for y in amino_b]
 sample = [arg2, arg1]
 make_array(sample)
+# print(response)
 
 
